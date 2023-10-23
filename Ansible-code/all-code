@@ -1,0 +1,182 @@
+##### Creating ansible playground.
+
+-Create folder playbook inside ansible folder.
+-Create a playbook textfile name demo.txt
+-vim create_file.yaml
+write : 
+---
+- name: This playbook will create a file for tracking all changes
+  hosts: all
+  become: true
+  tasks:
+    - name: ceating file
+      file:
+        path: /home/ubuntu/demo.txt
+        state: touch
+#### Playbook to create folder demo and file example.txt at same time within hosts
+---
+- name: This playbook will create a directory and a file for tracking all changes
+  hosts: all
+  become: true
+  tasks:
+    - name: Creating directory
+      file:
+        path: /home/ubuntu/demo
+        state: directory
+
+    - name: Creating a file
+      file:
+        path: /home/ubuntu/demo/example.txt
+        state: touch
+
+-Check for file indemptation by running this command
+ ansible-playbook -C install_tomcat.yaml
+- apply command to create files within the hosts:
+ansible-playbook create_file.yaml -i /home/ubuntu/ansible/hosts --private-key=~/.ssh/ansible_key
+
+#### Create a playbook file for users.
+-vim create_user.yaml
+write:
+---
+- name: This file will create users
+  hosts: all
+  become: true
+  tasks:
+    - name: Creating user with name paradigm
+      user: name=paradigm
+---
+- name: Create user
+ hosts: all
+ tasks:
+ - name: User creation
+  user:
+   name: Terence
+   password: paradigm
+   uid: 1590
+   home: /home/ubuntu/Demo
+   comment: "A normal user"
+   shell: /bin/bash
+
+---
+- name: Create user
+  hosts: all
+  tasks:
+    - name: Generate encrypted password
+      set_fact:
+        encrypted_password: "{{ 'paradigm' | password_hash('bcrypt') }}"
+      run_once: yes
+
+    - name: User creation
+      user:
+        name: Terence
+        password: "{{ encrypted_password }}"
+        uid: 1590
+        home: /home/ubuntu/demo
+        comment: "A normal user"
+        shell: /bin/bash
+Apply command to create userfile within the hosts.
+ansible-playbook create_user.yaml -i /home/ubuntu/ansible/hosts --private-key=~/.ssh/ansible_key
+
+
+#### Create playbook to install docker within hosts.
+vim install_docker.yaml
+write....
+
+---
+- name: This file will install docker on hosts
+  hosts: all
+  become: true
+  tasks:
+  - name: add docker gpg apt key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state:  present
+
+  - name: add docker repository
+    apt_repository:
+      repo: deb https://download.docker.com/linux/ubuntu jammy stable
+      state: present
+
+  - name: install docker
+    apt:
+      name: docker-ce
+      state:  latest
+
+
+#### Small project on installing nginx to the hosts
+
+- create a playbook for installing nginx = vim create_mynginx.yaml
+write ..
+---
+- name: This will install nginx
+  hosts: all
+  become: true
+  tasks:
+    - name: update apt cache
+      apt:
+        update_cache: yes
+
+    - name: install nginx
+      apt:
+        name: nginx
+        state: latest
+        force_apt_get: yes
+
+    - name: start nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+-command to udate your ansible servers
+ansible all -m apt -a "upgrade=yes update_cache=yes cache_valid_time=86400" --become -i /home/ubuntu/ansible/host
+s --private-key=~/.ssh/ansible_key
+
+-Create and html file to host a static webside on nginx.
+vim index.html
+write ...
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Ansible-Home</title>
+</head>
+<body>
+	<center><h1>Ansible</h1></center>
+	<marquee>A part of DesvOps & Automation</marquee>
+	<center><img src="https://www.freecodecamp.org/news/content/images/2021/09/ansble.png"></center>
+	<p>Created by som</p>
+</body>
+</html>
+
+- intergrate the install nginx playbook with the index.html playbook to be able to get modified nginx webserver browser.
+
+---
+- name: This will install nginx
+  hosts: all
+  become: true
+  tasks:
+    - name: update apt cache
+      apt:
+        update_cache: yes
+
+    - name: install nginx
+      apt:
+        name: nginx
+        state: latest
+        force_apt_get: yes
+
+    - name: start nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: host static page
+      copy:
+        src: /home/ubuntu/ansible/playbook/index.html
+        dest: /var/www/html/
+run the command to install nginx into hosts
+ansible-playbook create_mynginx.yaml -i /home/ubuntu/ansible/hosts --private-key=~/.ssh/ansible_key
