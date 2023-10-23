@@ -1,0 +1,22 @@
+---
+- name: This file will create users
+  hosts: all
+  become: true
+  tasks:
+    - name: Creating user with name paradigm
+      user: name=paradigm
+      
+---
+- name: Create user
+ hosts: all
+ tasks:
+ - name: User creation
+  user:
+   name: Terence
+   password: paradigm
+   uid: 1590
+   home: /home/ubuntu/Demo
+   comment: "A normal user"
+   shell: /bin/bash
+
+

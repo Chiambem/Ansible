@@ -1,0 +1,19 @@
+---
+- name: This scripts will install docker
+  hosts: all
+  become: true
+  tasks:
+  - name: add docker gpg apt key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+
+  - name: add docker repository
+    apt_repository:
+      repo: deb https://download.docker.com/linux/ubuntu jammy stable
+      state: present
+
+  - name: install docker
+    apt:
+      name: docker-ce
+      state: latest
